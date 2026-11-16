@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>神隊友育成器 - 新手爸爸升級指南</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body, html { background-color: #EBF1F5; min-height: 100vh; color: #1F2937; }
+    button { border: none; background: none; cursor: pointer; font-family: inherit; }
+    button:active { opacity: 0.75; transform: scale(0.99); }
+    input { font-family: inherit; outline: none; }
+    @keyframes fall {
+      0% { transform: translateY(-30px) rotate(0deg); opacity: 1; }
+      80% { opacity: 0.9; }
+      100% { transform: translateY(80vh) rotate(720deg); opacity: 0; }
+    }
+    .confetti-piece {
+      position: fixed;
+      top: 0;
+      pointer-events: none;
+      z-index: 9999;
+      animation-name: fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // 🎉 慶祝撒花組件
+    const ConfettiCelebration = () => {
+      const confettiColors = ['#FF4081', '#00E5FF', '#FFB300', '#7C4DFF', '#00E676', '#FF6E40'];
+      const pieces = useMemo(() => Array.from({ length: 40 }).map((_, i) => ({
+        id: i,
+        left: Math.random() * 100 + 'vw',
+        delay: (Math.random() * 0.8) + 's',
+        duration: (2.2 + Math.random() * 1.5) + 's',
+        color: confettiColors[i % confettiColors.length],
+        size: 8 + Math.random() * 6,
+        isCircle: i % 3 === 0,
+      })), []);
+
+      return (
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }}>
+          {pieces.map((p) => (
+            <div
+              key={p.id}
+              className="confetti-piece"
+              style={{
+                left: p.left,
+                width: p.size + 'px',
+                height: (p.isCircle ? p.size : p.size * 1.6) + 'px',
+                borderRadius: p.isCircle ? '50%' : '2px',
+                backgroundColor: p.color,
+                animationDelay: p.delay,
+                animationDuration: p.duration,
+              }}
+            />
+          ))}
+        </div>
+      );
+    };
+
+    function App() {
+      const [level, setLevel] = useState(1);
+      const [xp, setXp] = useState(0);
+      const [coins, setCoins] = useState(120);
+
+      const calculateMaxExp = (lvl) => {
+        if (lvl >= 40) return 99999;
+        return Math.round(50 + lvl * 25 + Math.pow(lvl, 1.7) * 5);
+      };
+      const maxExp = calculateMaxExp(level);
+
+      const getDadTitle = (lvl) => {
+        if (lvl <= 4) return '新手村爸爸';
+        if (lvl <= 8) return '防雷小學徒';
+        if (lvl <= 12) return '超聲波探險家';
+        if (lvl <= 16) return '胎教音樂DJ';
+        if (lvl <= 20) return '胎動偵測雷達官';
+        if (lvl <= 24) return '腰痠背痛救星';
+        if (lvl <= 28) return '走佬袋司令官';
+        if (lvl <= 32) return '陣痛期指揮官';
+        if (lvl <= 36) return '換片特種部隊';
+        return '育兒界武林宗師 👑';
+      };
+
+      const getMomRewardTiers = (currentMaxExp) => [
+        { label: '貼心小舉動（例如遞水 / 問候）', points: Math.max(4, Math.round(currentMaxExp * 0.05)), emoji: '☕' },
+        { label: '普通乖（例如準時陪食飯 / 聽話）', points: Math.max(8, Math.round(currentMaxExp * 0.1)), emoji: '😊' },
+        { label: '表現唔錯（例如主動分擔家務）', points: Math.max(12, Math.round(currentMaxExp * 0.15)), emoji: '🧹' },
+        { label: '神隊友表現（例如按摩 / 陪產檢）', points: Math.max(18, Math.round(currentMaxExp * 0.22)), emoji: '💆‍♂️' },
+        { label: '超級 MVP（例如全天候滿分照顧）', points: Math.max(24, Math.round(currentMaxExp * 0.3)), emoji: '🏆' },
+      ];
+
+      const addReward = (earnedExp, earnedCoins) => {
+        setCoins((prev) => prev + earnedCoins);
+        let newXp = xp + earnedExp;
+        let newLevel = level;
+        let currentMax = calculateMaxExp(newLevel);
+
+        while (newXp >= currentMax && newLevel < 40) {
+          newXp -= currentMax;
+          newLevel += 1;
+          currentMax = calculateMaxExp(newLevel);
+        }
+        if (newLevel >= 40) newXp = Math.min(newXp, currentMax);
+
+        setXp(newXp);
+        setLevel(newLevel);
+        return { newLevel, leveledUp: newLevel > level };
+      };
+
+      const [appFlow, setAppFlow] = useState('auth');
+      const [email, setEmail] = useState('daddyleklek@gmail.com');
+      const [password, setPassword] = useState('123456');
+      const [isSignUp, setIsSignUp] = useState(false);
+
+      const [dueDate, setDueDate] = useState('2027-05-01');
+      const [tempDueDate, setTempDueDate] = useState('2027-05-01');
+      const [isDueDateModified, setIsDueDateModified] = useState(false);
+
+      const [currentScreen, setCurrentScreen] = useState('home');
+      const [weeklyModalVisible, setWeeklyModalVisible] = useState(false);
+      const [bookModalVisible, setBookModalVisible] = useState(false);
+      const [bagModalVisible, setBagModalVisible] = useState(false);
+      const [momBonusModalVisible, setMomBonusModalVisible] = useState(false);
+      const [actionModalVisible, setActionModalVisible] = useState(false);
+      const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+
+      const [isMomRatedToday, setIsMomRatedToday] = useState(false);
+      const [momToastMessage, setMomToastMessage] = useState('');
+
+      const hospitalBagItems = [
+        { id: 'm1', category: 'mom', name: '準爸媽的正本身份證明文件', usage: '辦理入院登記、陪產及出生登記手續時必須核對身份證。' },
+        { id: 'm2', category: 'mom', name: '產前報告及母嬰健康院的產前紀錄（如適用）', usage: '讓醫護人員快速了解孕期檢查結果、血型及過往病歷。' },
+        { id: 'm3', category: 'mom', name: '暖水壺（有飲管會更方便）', usage: '產後補充水分。' },
+        { id: 'm4', category: 'mom', name: '防疫用品（如口罩、面罩）', usage: '保護剛生產完的媽媽及新生兒，進出病房必備。' },
+        { id: 'm5', category: 'mom', name: '60x90cm 的防水床墊', usage: '墊在病床上，防止穿羊水或產後惡露弄髒床單。' },
+        { id: 'm6', category: 'mom', name: '產婦衛生巾（2-3包）', usage: '產後初期惡露量較多，按需使用加長型。' },
+        { id: 'm7', category: 'mom', name: '產婦網褲（1包）', usage: '透氣度高且具彈性，方便固定產婦衛生巾，亦避免壓迫傷口。' },
+        { id: 'm8', category: 'mom', name: '沖洗瓶', usage: '每次如廁後裝溫水沖洗會陰部，保持傷口清潔並減少感染風險。' },
+        { id: 'm9', category: 'mom', name: '個人護理用品（如牙刷、洗面巾）', usage: '住院期間日常梳洗用。' },
+        { id: 'm10', category: 'mom', name: '防滑拖鞋', usage: '產後身體較虛弱，在病房或洗手間走動時防止滑倒。' },
+        { id: 'b1', category: 'baby', name: '嬰兒衣物一套', usage: '出院時給寶寶穿著（如外衣、包被、帽仔及手套）。' },
+        { id: 'b2', category: 'baby', name: '嬰兒濕紙巾', usage: '無酒精、無香料配方，專用於換片時替寶寶清潔臀部。' },
+        { id: 'b3', category: 'baby', name: '嬰兒尿片（1包）', usage: '準備初生碼（NB碼），住院期間平均每日需更換約 8-10 片。' },
+      ];
+
+      const [checkedBagItems, setCheckedBagItems] = useState({});
+      const [expandedItems, setExpandedItems] = useState({});
+      const toggleBagItem = (id) => setCheckedBagItems((prev) => ({ ...prev, [id]: !prev[id] }));
+      const toggleExpandItem = (id) => setExpandedItems((prev) => ({ ...prev, [id]: !prev[id] }));
+
+      const [isWeeklyTaskCompleted, setIsWeeklyTaskCompleted] = useState(false);
+      const [isMassageDone, setIsMassageDone] = useState(false);
+      const [isSupplementDone, setIsSupplementDone] = useState(false);
+
+      const [quizStep, setQuizStep] = useState(0);
+      const [selectedOption, setSelectedOption] = useState(null);
+      const [isSubmitted, setIsSubmitted] = useState(false);
+      const [correctCount, setCorrectCount] = useState(0);
+      const [earnedStars, setEarnedStars] = useState(0);
+      const [praiseMessage, setPraiseMessage] = useState('');
+      const [isQuizCompletedToday, setIsQuizCompletedToday] = useState(false);
+
+      const isValidEmail = (emailStr) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr.trim());
+
+      const formatDueDateInput = (text) => {
+        const cleaned = text.replace(/\D/g, '').slice(0, 8);
+        if (cleaned.length > 4 && cleaned.length <= 6) return `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+        if (cleaned.length > 6) return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6)}`;
+        return cleaned;
+      };
+
+      const calculatePregnancyInfo = (targetDueDate) => {
+        if (!targetDueDate) return { week: 5, day: 6, daysUntilDue: 240 };
+        const due = new Date(targetDueDate);
+        if (isNaN(due.getTime())) return { week: 5, day: 6, daysUntilDue: 240 };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        due.setHours(0, 0, 0, 0);
+
+        const diffToDue = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const daysUntilDue = diffToDue > 0 ? diffToDue : 0;
+
+        const lmpDate = new Date(due.getTime() - 280 * 24 * 60 * 60 * 1000);
+        const totalDays = Math.floor((today.getTime() - lmpDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (totalDays < 0) return { week: 1, day: 1, daysUntilDue };
+
+        const calculatedWeek = Math.min(42, Math.floor(totalDays / 7) + 1);
+        const calculatedDay = (totalDays % 7) + 1;
+        return { week: calculatedWeek, day: calculatedDay, daysUntilDue };
+      };
+
+      const { week: currentWeek, day: currentDay, daysUntilDue } = calculatePregnancyInfo(dueDate);
+
+      const handleAuthSubmit = () => {
+        if (!email.trim() || !password.trim()) return alert('提示：請輸入電郵地址與密碼');
+        if (!isValidEmail(email)) return alert('格式錯誤：請輸入有效的電郵地址');
+        if (password.trim().length < 6) return alert('提示：密碼長度最少需要 6 個字元');
+        setAppFlow('onboarding');
+      };
+
+      const isValidDate = (dateString) => {
+        if (!dateString.match(/^\d{4}-\d{2}-\d{2}$/)) return false;
+        const d = new Date(dateString);
+        return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === dateString;
+      };
+
+      const handleInitialDueDateSubmit = () => {
+        if (!tempDueDate.trim() || !isValidDate(tempDueDate.trim())) {
+          return alert('提示：請輸入完整的 8 位數字預產期（例如：20271015）');
+        }
+        setDueDate(tempDueDate.trim());
+        setAppFlow('main');
+      };
+
+      const handleSaveDueDateInSettings = () => {
+        if (isDueDateModified) return;
+        if (!tempDueDate.trim() || !isValidDate(tempDueDate.trim())) {
+          return alert('提示：請輸入完整的 8 位數字預產期（例如：20271015）');
+        }
+        setDueDate(tempDueDate.trim());
+        setIsDueDateModified(true);
+        setSettingsModalVisible(false);
+        alert('成功：預產期已更新！');
+      };
+
+      const handleSelectMomReward = (tier) => {
+        if (isMomRatedToday) return;
+        const { newLevel, leveledUp } = addReward(tier.points, 5);
+        setIsMomRatedToday(true);
+        setMomToastMessage(
+          leveledUp
+            ? `🎉 獲得 +${tier.points} XP！恭喜升級至 Level ${newLevel}（${getDadTitle(newLevel)}）！今日評分已完成。`
+            : `❤️ 已發放 +${tier.points} XP（${tier.label}）！今日評分已完成，聽日再繼續加油！`
+        );
+      };
+
+      const weeklyTaskDataList = [
+        {
+          minWeek: 1, maxWeek: 6,
+          tag: '第 12 - 18 週關鍵任務',
+          title: '預約結構超聲波',
+          warningTitle: '⚠️ 提早預約&記得請假！',
+          warningContent: '結構超聲波的最佳檢查時間是在懷孕第20-22周間，能仔細檢查胎兒的結構及內臟器官，用於詳細評估胎兒是否發育正常。',
+          buttonText: '我已預約檢查及請假 🏥',
+        },
+      ];
+      const activeWeeklyTask = weeklyTaskDataList.find((t) => currentWeek >= t.minWeek && currentWeek <= t.maxWeek) || weeklyTaskDataList[0];
+
+      const allKnowledgeList = [
+        { day: 1, title: '👶 小知識：胃口回歸與熱量控制', content: '媽媽孕吐減緩、食慾大開，但不需要「一人吃兩人補」。每天只需比平時多攝取約 300 大卡(約一碗飯加一顆蛋），爸爸可多準備蛋白質與蔬菜，避免體重增加太快。' },
+        { day: 2, title: '👶 小知識：寶寶像牛油果大小，開始會做表情', content: '6 週的寶寶約 11–12 公分，臉部小肌肉開始發育，會皺眉、做鬼臉甚至吸大拇指！同時骨骼正在變硬，爸爸記得提醒媽媽多補充鈣質。' },
+        { day: 3, title: '👶 小知識：胎盤形成與顯懷', content: '胎盤已經完全發育並接管了供給寶寶營養和氧氣的重要任務；同時子宮開始往上離開骨盆腔，媽媽的肚子（「顯懷」）會開始微微隆起。爸爸這時可以幫忙挑選舒適、不壓迫肚子的孕婦裝或褲子，讓媽媽穿得更舒服！' },
+        { day: 4, title: '👶 小知識：情緒支持與神隊友', content: '荷爾蒙改變會讓媽媽情緒起伏較大，爸爸的主動傾聽與包容就是最好的處方！' },
+        { day: 5, title: '👶 小知識：避免接觸有害物質', content: '遠離二手煙、酒精及未煮熟的食物，確保媽媽與寶寶的環境安全。' },
+        { day: 6, title: '👶 小知識：孕期「黃金蜜月期」', content: '這階段媽媽早期不適消退、肚子還不算重，體力最好。很適合夫妻倆安排輕鬆的 Babymoon（產前小旅行），並提前討論月子或陪月安排。' },
+      ];
+      const todayKnowledge = allKnowledgeList[(currentDay - 1) % allKnowledgeList.length];
+
+      const quizQuestions = [
+        {
+          id: 1,
+          question: '1. 懷孕 16 週媽媽胃口變好，每天大約需要比懷孕前多攝取多少熱量？',
+          options: [
+            'A. 熱量要變成原本的兩倍（「一人吃兩人補」）',
+            'B. 每天只需多攝取約 300 大卡（約一碗飯加一顆蛋）',
+            'C. 完全不需要增加熱量',
+            'D. 每天額外多喝三杯全脂牛奶'
+          ],
+          answer: 1,
+        },
+        {
+          id: 2,
+          question: '2. 關於 16 週寶寶在子宮裡的發展，以下哪一項是正確的？',
+          options: [
+            'A. 已經有一顆大西瓜那麼重',
+            'B. 臉部肌肉開始發育，會做表情甚至吸大拇指',
+            'C. 骨頭已經完全長硬，不需要再補鈣',
+            'D. 整天都在睡覺，完全不會動'
+          ],
+          answer: 1,
+        },
+        {
+          id: 3,
+          question: '3. 為什麼 16 週前後常被稱為孕期的「蜜月期」？',
+          options: [
+            'A. 因為完全不需要做任何產檢',
+            'B. 因為肚子已經大到只能在家臥床休息',
+            'C. 因為早期不適大多消退、肚子還不算重，媽媽體力與行動最舒適',
+            'D. 因為寶寶隨時準備好要出生了'
+          ],
+          answer: 2,
+        },
+      ];
+
+      const cantonesePraises = {
+        3: [
+          '「嘩！你真係好叻仔呀爸爸！全對過關，絕對係滿分神隊友！」',
+          '「犀利呀爸爸！題題都識答，媽媽同 BB 有你照顧真係好幸福！」',
+          '「勁呀！100% 全中！你已經準備好做個滿分好爸爸啦！」',
+        ],
+        2: ['「你很棒呀爸爸！答啱超過一半啦，再加把勁挑戰全對拎三粒星解鎖下一關啦！」'],
+        1: ['「有心唔怕遲，你肯抽時間學已經好棒啦爸爸！」'],
+        0: ['「唔緊要呀爸爸，萬事起頭難！返去重溫一下小知識，挑戰全對解鎖下一關！」'],
+      };
+
+      const handleSubmitAnswer = () => {
+        if (selectedOption === null) return;
+        const currentQ = quizQuestions[quizStep - 1];
+        setIsSubmitted(true);
+        if (selectedOption === currentQ.answer) setCorrectCount((prev) => prev + 1);
+      };
+
+      const handleNextQuestion = () => {
+        setSelectedOption(null);
+        setIsSubmitted(false);
+        if (quizStep < quizQuestions.length) {
+          setQuizStep(quizStep + 1);
+        } else {
+          const accuracy = correctCount / quizQuestions.length;
+          let stars = accuracy === 1 ? 3 : accuracy >= 0.5 ? 2 : accuracy >= 0.1 ? 1 : 0;
+          let xpReward = stars === 3 ? 50 : stars === 2 ? 20 : 10;
+          const pool = cantonesePraises[stars];
+          setEarnedStars(stars);
+          setPraiseMessage(pool[Math.floor(Math.random() * pool.length)]);
+          if (stars === 3 && !isQuizCompletedToday) {
+            addReward(xpReward, 0);
+            setIsQuizCompletedToday(true);
+          }
+          setQuizStep(4);
+        }
+      };
+
+      const handleFinishQuiz = () => {
+        setQuizStep(0);
+        setSelectedOption(null);
+        setIsSubmitted(false);
+        setCorrectCount(0);
+        setEarnedStars(0);
+        setCurrentScreen('home');
+      };
+
+      // ================= 階段 1：起始頁 =================
+      if (appFlow === 'auth') {
+        return (
+          <div style={s.fullScreen}>
+            <div style={s.authCard}>
+              <div style={s.authLogo}>👶🏻 神隊友育成器</div>
+              <div style={s.authSubtitle}>新手爸爸升級指南</div>
+              <div style={s.inputGroup}>
+                <div style={s.label}>電郵地址 (Email)</div>
+                <input style={s.input} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+              <div style={s.inputGroup}>
+                <div style={s.label}>密碼</div>
+                <input style={s.input} type="password" placeholder="請輸入密碼 (最少 6 個字元)" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </div>
+              <button style={s.primaryBtn} onClick={handleAuthSubmit}>{isSignUp ? '輕鬆註冊' : '登入帳號'}</button>
+              <button style={{ marginTop: 15, color: '#00A8CC', fontSize: 13, fontWeight: 600 }} onClick={() => setIsSignUp(!isSignUp)}>
+                {isSignUp ? '已有帳號？按此登入' : '未有帳號？按此註冊新帳號'}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // ================= 階段 2：首次輸入預產期 =================
+      if (appFlow === 'onboarding') {
+        return (
+          <div style={s.fullScreen}>
+            <div style={s.authCard}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>📅</div>
+              <div style={s.authLogo}>設定寶寶預產期</div>
+              <div style={{ ...s.authSubtitle, marginBottom: 20 }}>請輸入 8 位數字預產期（例如：20271015）</div>
+              <div style={s.inputGroup}>
+                <div style={s.label}>預產期 (YYYY-MM-DD)</div>
+                <input style={s.input} type="tel" placeholder="例如：2027-10-15" value={tempDueDate} onChange={(e) => setTempDueDate(formatDueDateInput(e.target.value))} maxLength={10} />
+                <div style={s.hintText}>* 提示：登入後可在「⚙️ 設定」中最多更改 1 次。</div>
+              </div>
+              <button style={s.primaryBtn} onClick={handleInitialDueDateSubmit}>開啟神隊友之旅 🚀</button>
+            </div>
+          </div>
+        );
+      }
+
+      // ================= 階段 3：正式主畫面 =================
+      const momRewardTiers = getMomRewardTiers(maxExp);
+      const checkedCount = Object.values(checkedBagItems).filter(Boolean).length;
+      const momItems = hospitalBagItems.filter((i) => i.category === 'mom');
+      const babyItems = hospitalBagItems.filter((i) => i.category === 'baby');
+
+      return (
+        <div style={s.appWrapper}>
+          {currentScreen === 'home' ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingBottom: 95 }}>
+              {/* Header */}
+              <div style={s.header}>
+                <div style={{ flex: 1, marginRight: 6 }}>
+                  <div style={s.appTitle}>神隊友育成器</div>
+                  <div style={s.subTextRow}>
+                    <span style={{ fontSize: 12, fontWeight: 'bold', color: '#374151' }}>W{currentWeek}D{currentDay}</span>
+                    <span style={{ fontSize: 11, color: '#9CA3AF', margin: '0 4px' }}>｜</span>
+                    <span style={{ fontSize: 12, color: '#6B7280' }}>預產期: {dueDate}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  <div style={s.pillBadge}>
+                    <span style={{ fontSize: 12, marginRight: 2 }}>🪙</span>
+                    <span style={s.statText}>{coins}</span>
+                  </div>
+                  <div style={s.pillBadge}>
+                    <span style={{ fontSize: 12, marginRight: 2 }}>⚡</span>
+                    <span style={s.statText}>LV.{level}</span>
+                    <div style={s.progressBarBg}>
+                      <div style={{ height: '100%', backgroundColor: '#FF4081', width: `${Math.min(100, (xp / maxExp) * 100)}%`, transition: 'width 0.3s' }} />
+                    </div>
+                  </div>
+                  <button style={s.settingsBtn} onClick={() => { setTempDueDate(dueDate); setSettingsModalVisible(true); }}>⚙️</button>
+                </div>
+              </div>
+
+              {/* 主要卡片 */}
+              <div style={s.cardContainer}>
+                <div style={s.topPinkBar} />
+
+                <div style={s.floatingButtons}>
+                  <button style={s.circleBtn} onClick={() => setBookModalVisible(true)}>📚</button>
+                  <button style={{ ...s.circleBtn, marginTop: 8 }} onClick={() => setBagModalVisible(true)}>🎒</button>
+                </div>
+
+                <div style={s.tag}>動態 3D 超聲波模型 🔬</div>
+
+                {/* 🧊 3D 超聲波胎兒模型 */}
+                <div style={s.fetal3DContainer}>
+                  <iframe
+                    title="Fetus"
+                    src="https://sketchfab.com/models/8bf872eed84e47dba4555f4675077453/embed?autostart=1&ui_controls=1&ui_infos=0&ui_inspector=0&ui_watermark=0"
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    allow="autoplay; fullscreen; xr-spatial-tracking"
+                  />
+                </div>
+
+                {/* 💬 寶寶對白框 */}
+                {isQuizCompletedToday ? (
+                  <div style={{ ...s.dialogBox, backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0' }}>
+                    <div style={{ fontSize: 13, color: '#047857', fontWeight: 'bold', textAlign: 'center', lineHeight: '20px' }}>
+                      👶 謝謝爸爸的努力，我又大一天了！距離預產期仲有 {daysUntilDue} 日，就可以見到爸爸喇！🎉
+                    </div>
+                  </div>
+                ) : (
+                  <div style={s.dialogBox}>
+                    <div style={{ fontSize: 13, color: '#374151', textAlign: 'center', lineHeight: '20px' }}>
+                      今日係 W{currentWeek}D{currentDay}！完成今日全對 Quiz 即可解鎖寶寶對話與倒數計時！❤️ (距離見到爸爸仲有 {daysUntilDue} 日)
+                    </div>
+                  </div>
+                )}
+
+                {/* 👑 稱號卡片 */}
+                <div style={s.titleBadgeCard}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 2 }}>
+                    <span style={{ fontSize: 14, marginRight: 4 }}>👑</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#888', letterSpacing: 1 }}>你的稱號</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#D81B60', letterSpacing: 0.5 }}>{getDadTitle(level)}</div>
+                </div>
+
+                {/* 成長進度 */}
+                <div style={s.growthBox}>
+                  <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>成長進度：Level {level} ({xp} / {maxExp} XP)</span>
+                </div>
+
+                {/* ❤️ 媽媽評分按鈕 */}
+                <button
+                  style={{ ...s.momBonusMainBtn, ...(isMomRatedToday ? s.momBonusMainBtnDone : {}) }}
+                  onClick={() => setMomBonusModalVisible(true)}
+                >
+                  <span style={{ color: isMomRatedToday ? '#6B7280' : '#D81B60', fontSize: 14, fontWeight: 'bold' }}>
+                    {isMomRatedToday ? '✅ 今日媽媽已完成評分（每日限一次）' : '❤️ 媽媽評分發放獎勵 (XP)'}
+                  </span>
+                </button>
+              </div>
+
+              {/* 底部導覽列 */}
+              <div style={s.bottomNavCard}>
+                <button style={s.navItem} onClick={() => { setQuizStep(0); setCorrectCount(0); setSelectedOption(null); setIsSubmitted(false); setCurrentScreen('quiz'); }}>
+                  <div style={{ ...s.navCircle, backgroundColor: '#00E5FF' }}>💡</div>
+                  <div style={s.navLabel}>每日知識 Quiz</div>
+                </button>
+                <button style={s.navItem} onClick={() => setActionModalVisible(true)}>
+                  <div style={{ ...s.navCircle, backgroundColor: '#FF4081' }}>🤝</div>
+                  <div style={s.navLabel}>實體互動任務</div>
+                </button>
+                <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
+                  <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
+                  <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* ================= Quiz 頁面 ================= */
+            <div style={{ padding: 20, maxWidth: 480, margin: '0 auto', width: '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+                <button onClick={handleFinishQuiz} style={s.backBtn}>✕ 關閉</button>
+                <div style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 15, color: '#1F2937' }}>每日知識 + Quiz</div>
+              </div>
+
+              {quizStep === 0 && (
+                <div style={s.quizCard}>
+                  <div style={s.knowledgeTitle}>W{currentWeek}D{currentDay} {todayKnowledge.title}</div>
+                  <div style={s.knowledgeContent}>{todayKnowledge.content}</div>
+                  <button style={s.actionBtn} onClick={() => { setCorrectCount(0); setQuizStep(1); }}>開始挑戰贏星星 ⭐ ➔</button>
+                </div>
+              )}
+
+              {(quizStep >= 1 && quizStep <= 3) && (
+                <div style={s.quizCard}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, color: '#FF4081', fontWeight: 'bold' }}>題目 {quizStep} / {quizQuestions.length}</span>
+                    <span style={s.scoreBadge}>目前答對：{correctCount} 題</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold', color: '#1F2937', marginBottom: 20, lineHeight: '22px' }}>
+                    {quizQuestions[quizStep - 1].question}
+                  </div>
+                  {quizQuestions[quizStep - 1].options.map((option, idx) => {
+                    let bg = '#F3F4F6', border = '#E5E7EB';
+                    if (selectedOption === idx) { bg = '#E0F2FE'; border = '#0284C7'; }
+                    if (isSubmitted) {
+                      if (idx === quizQuestions[quizStep - 1].answer) { bg = '#DCFCE7'; border = '#22C55E'; }
+                      else if (selectedOption === idx) { bg = '#FEE2E2'; border = '#EF4444'; }
+                    }
+                    return (
+                      <button
+                        key={idx}
+                        style={{ ...s.optionBtn, backgroundColor: bg, borderColor: border }}
+                        onClick={() => !isSubmitted && setSelectedOption(idx)}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                  {!isSubmitted ? (
+                    <button
+                      style={{ ...s.actionBtn, backgroundColor: selectedOption === null ? '#9CA3AF' : '#00A8CC' }}
+                      disabled={selectedOption === null}
+                      onClick={handleSubmitAnswer}
+                    >
+                      確定答案
+                    </button>
+                  ) : (
+                    <button style={s.actionBtn} onClick={handleNextQuestion}>下一題 ➔</button>
+                  )}
+                </div>
+              )}
+
+              {quizStep === 4 && (
+                <div style={{ ...s.quizCard, textAlign: 'center', padding: '28px 20px', borderColor: '#FDE68A', borderWidth: 2 }}>
+                  <div style={s.celebrationBadge}>🏆 挑戰完成！</div>
+                  <div style={{ fontSize: 16, fontWeight: 'bold', color: '#374151', margin: '10px 0 16px' }}>
+                    答對 {correctCount} / {quizQuestions.length} 題
+                  </div>
+                  <div style={s.praiseBubble}>{praiseMessage}</div>
+                  <button style={s.actionBtn} onClick={handleFinishQuiz}>返回首頁 🎉</button>
+                </div>
+              )}
+              {quizStep === 4 && earnedStars === 3 && <ConfettiCelebration />}
+            </div>
+          )}
+
+          {/* ================= 彈出視窗 Modals ================= */}
+          {momBonusModalVisible && (
+            <div style={s.modalOverlay} onClick={() => setMomBonusModalVisible(false)}>
+              <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
+                <div style={{ ...s.weeklyTag, backgroundColor: '#FF4081' }}>老婆專屬打分區 💖（每日限一次）</div>
+                <div style={s.weeklyTitle}>媽媽評分發放獎勵</div>
+                <div style={s.modalSubDesc}>目前為 Level {level}（升級需 {maxExp} XP）。最高單次獎勵為升級經驗嘅 30%，每日限評分 1 次：</div>
+
+                {momToastMessage && <div style={s.momToastBanner}>{momToastMessage}</div>}
+
+                <div style={{ width: '100%', maxHeight: '50vh', overflowY: 'auto' }}>
+                  {momRewardTiers.map((tier, idx) => (
+                    <button
+                      key={idx}
+                      disabled={isMomRatedToday}
+                      onClick={() => handleSelectMomReward(tier)}
+                      style={{ ...s.momRewardOptionBtn, ...(isMomRatedToday ? s.momRewardOptionBtnDisabled : {}) }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', flex: 1, textAlign: 'left' }}>
+                        <span style={{ fontSize: 20, marginRight: 10 }}>{tier.emoji}</span>
+                        <span style={{ fontSize: 13, fontWeight: 'bold', color: isMomRatedToday ? '#9CA3AF' : '#374151', paddingRight: 8 }}>{tier.label}</span>
+                      </div>
+                      <span style={{ ...s.momRewardPointsBadge, backgroundColor: isMomRatedToday ? '#9CA3AF' : '#FF4081' }}>+{tier.points} XP</span>
+                    </button>
+                  ))}
+                </div>
+                <button style={{ ...s.actionBtn, backgroundColor: '#FF4081', marginTop: 14 }} onClick={() => setMomBonusModalVisible(false)}>關閉視窗</button>
+              </div>
+            </div>
+          )}
+
+          {bagModalVisible && (
+            <div style={s.modalOverlay} onClick={() => setBagModalVisible(false)}>
+              <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
+                <div style={{ ...s.weeklyTag, backgroundColor: '#00A8CC' }}>待產包必備清單 🎒</div>
+                <div style={s.weeklyTitle}>準備走佬袋</div>
+                <div style={s.modalSubDesc}>點擊項目即可打勾標記進度（已準備 {checkedCount} / {hospitalBagItems.length} 項）：</div>
+
+                <div style={{ width: '100%', maxHeight: '52vh', overflowY: 'auto', textAlign: 'left', margin: '8px 0' }}>
+                  <div style={s.bagCatHeader}>🤰 媽媽及入院必備（{momItems.length} 項）</div>
+                  {momItems.map((item) => {
+                    const isChecked = !!checkedBagItems[item.id];
+                    const isExpanded = !!expandedItems[item.id];
+                    return (
+                      <div key={item.id} style={s.bagItemBox}>
+                        <div style={{ display: 'flex', alignItems: 'center', padding: 10 }}>
+                          <div onClick={() => toggleBagItem(item.id)} style={{ paddingRight: 10, cursor: 'pointer' }}>
+                            <div style={{ ...s.bagCheck, backgroundColor: isChecked ? '#0099B8' : '#FFF' }}>{isChecked ? '✓' : ''}</div>
+                          </div>
+                          <div onClick={() => toggleExpandItem(item.id)} style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                            <span style={{ fontSize: 14, color: '#1E293B', textDecoration: isChecked ? 'line-through' : 'none' }}>{item.name}</span>
+                            <span style={{ fontSize: 10, color: '#64748B', marginLeft: 6 }}>{isExpanded ? '▲' : '▼'}</span>
+                          </div>
+                        </div>
+                        {isExpanded && (
+                          <div style={{ backgroundColor: '#F8FAFC', padding: 10, borderTop: '1px solid #E2E8F0' }}>
+                            <div style={{ fontSize: 11, fontWeight: 'bold', color: '#0088A3', marginBottom: 2 }}>💡 用處說明：</div>
+                            <div style={{ fontSize: 12, color: '#475569', lineHeight: '17px' }}>{item.usage}</div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ ...s.bagCatHeader, marginTop: 12 }}>👶 BB 用品（{babyItems.length} 項）</div>
+                  {babyItems.map((item) => {
+                    const isChecked = !!checkedBagItems[item.id];
+                    const isExpanded = !!expandedItems[item.id];
+                    return (
+                      <div key={item.id} style={s.bagItemBox}>
+                        <div style={{ display: 'flex', alignItems: 'center', padding: 10 }}>
+                          <div onClick={() => toggleBagItem(item.id)} style={{ paddingRight: 10, cursor: 'pointer' }}>
+                            <div style={{ ...s.bagCheck, backgroundColor: isChecked ? '#0099B8' : '#FFF' }}>{isChecked ? '✓' : ''}</div>
+                          </div>
+                          <div onClick={() => toggleExpandItem(item.id)} style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                            <span style={{ fontSize: 14, color: '#1E293B', textDecoration: isChecked ? 'line-through' : 'none' }}>{item.name}</span>
+                            <span style={{ fontSize: 10, color: '#64748B', marginLeft: 6 }}>{isExpanded ? '▲' : '▼'}</span>
+                          </div>
+                        </div>
+                        {isExpanded && (
+                          <div style={{ backgroundColor: '#F8FAFC', padding: 10, borderTop: '1px solid #E2E8F0' }}>
+                            <div style={{ fontSize: 11, fontWeight: 'bold', color: '#0088A3', marginBottom: 2 }}>💡 用處說明：</div>
+                            <div style={{ fontSize: 12, color: '#475569', lineHeight: '17px' }}>{item.usage}</div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <button style={{ ...s.actionBtn, marginTop: 12 }} onClick={() => setBagModalVisible(false)}>關閉清單</button>
+              </div>
+            </div>
+          )}
+
+          {settingsModalVisible && (
+            <div style={s.modalOverlay} onClick={() => setSettingsModalVisible(false)}>
+              <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
+                <div style={s.weeklyTitle}>⚙️ 帳號與系統設定</div>
+                <div style={{ width: '100%', marginBottom: 15, textAlign: 'left' }}>
+                  <div style={{ fontSize: 14, fontWeight: 'bold', color: '#374151' }}>已登入電郵：{email}</div>
+                  <div style={{ fontSize: 14, fontWeight: 'bold', color: '#374151', marginTop: 10 }}>預產期設定：</div>
+                  {isDueDateModified ? (
+                    <div style={s.disabledInputBox}>
+                      <div style={{ fontSize: 16, fontWeight: 'bold', color: '#6B7280' }}>{dueDate}</div>
+                      <div style={{ fontSize: 12, color: '#D97706', marginTop: 6 }}>⚠️ 預產期已經修改過一次。</div>
+                    </div>
+                  ) : (
+                    <input style={{ ...s.input, marginTop: 6 }} type="tel" value={tempDueDate} onChange={(e) => setTempDueDate(formatDueDateInput(e.target.value))} placeholder="例如：20271015" maxLength={10} />
+                  )}
+                </div>
+                {!isDueDateModified && <button style={s.saveBtn} onClick={handleSaveDueDateInSettings}>確定修改預產期</button>}
+                <button style={{ ...s.saveBtn, backgroundColor: '#EF4444', marginTop: 10 }} onClick={() => { setSettingsModalVisible(false); setAppFlow('auth'); }}>登出帳號</button>
+                <button style={s.cancelBtn} onClick={() => setSettingsModalVisible(false)}>關閉視窗</button>
+              </div>
+            </div>
+          )}
+
+          {actionModalVisible && (
+            <div style={s.modalOverlay} onClick={() => setActionModalVisible(false)}>
+              <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
+                <div style={{ ...s.weeklyTag, backgroundColor: '#FF4081' }}>每日神隊友行動 🤝</div>
+                <div style={s.weeklyTitle}>今日實體互動任務</div>
+                <div style={s.actionTaskBox}>
+                  <div style={s.actionTaskHeader}>
+                    <span style={{ fontSize: 14, fontWeight: 'bold', color: '#1F2937' }}>🧴 幫媽媽用護膚油按摩</span>
+                    <span style={{ fontSize: 11, fontWeight: 'bold', color: '#FF4081' }}>+25 XP ⚡ | +10 🪙</span>
+                  </div>
+                  <button style={{ ...s.actionTaskBtn, backgroundColor: isMassageDone ? '#9CA3AF' : '#FF4081' }} disabled={isMassageDone} onClick={() => { if (!isMassageDone) { addReward(25, 10); setIsMassageDone(true); } }}>
+                    {isMassageDone ? '已完成 ✅' : '我已完成按摩 💆🏻‍♀️'}
+                  </button>
+                </div>
+                <div style={s.actionTaskBox}>
+                  <div style={s.actionTaskHeader}>
+                    <span style={{ fontSize: 14, fontWeight: 'bold', color: '#1F2937' }}>🕙 提醒媽媽食營養補充品</span>
+                    <span style={{ fontSize: 11, fontWeight: 'bold', color: '#FF4081' }}>+15 XP ⚡ | +5 🪙</span>
+                  </div>
+                  <button style={{ ...s.actionTaskBtn, backgroundColor: isSupplementDone ? '#9CA3AF' : '#FF4081' }} disabled={isSupplementDone} onClick={() => { if (!isSupplementDone) { addReward(15, 5); setIsSupplementDone(true); } }}>
+                    {isSupplementDone ? '已完成 ✅' : '我已提醒並準備好 💊'}
+                  </button>
+                </div>
+                <button style={s.cancelBtn} onClick={() => setActionModalVisible(false)}>← 關閉視窗</button>
+              </div>
+            </div>
+          )}
+
+          {weeklyModalVisible && (
+            <div style={s.modalOverlay} onClick={() => setWeeklyModalVisible(false)}>
+              <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
+                <div style={s.weeklyTag}>{activeWeeklyTask.tag}</div>
+                <div style={s.weeklyTitle}>{activeWeeklyTask.title}</div>
+                <div style={s.warningBox}>
+                  <div style={{ fontSize: 14, fontWeight: 'bold', color: '#D97706', marginBottom: 6 }}>{activeWeeklyTask.warningTitle}</div>
+                  <div style={{ fontSize: 13, color: '#B45309', lineHeight: '20px' }}>{activeWeeklyTask.warningContent}</div>
+                </div>
+                <button style={{ ...s.completeTaskBtn, backgroundColor: isWeeklyTaskCompleted ? '#9CA3AF' : '#FFB800' }} disabled={isWeeklyTaskCompleted} onClick={() => { if (!isWeeklyTaskCompleted) { addReward(40, 25); setIsWeeklyTaskCompleted(true); } }}>
+                  {isWeeklyTaskCompleted ? '已完成 ✅ (+40 XP)' : activeWeeklyTask.buttonText}
+                </button>
+                <button style={s.cancelBtn} onClick={() => setWeeklyModalVisible(false)}>← 關閉視窗</button>
+              </div>
+            </div>
+          )}
+
+          {bookModalVisible && (
+            <div style={s.modalOverlay} onClick={() => setBookModalVisible(false)}>
+              <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
+                <div style={s.knowledgeTitle}>📚 孕期知識庫</div>
+                <div style={{ width: '100%', maxHeight: '52vh', overflowY: 'auto', textAlign: 'left', margin: '10px 0' }}>
+                  {allKnowledgeList.map((item, idx) => (
+                    <div key={idx} style={s.historyItemBox}>
+                      <div style={{ fontSize: 15, fontWeight: 'bold', color: '#00A8CC', marginBottom: 6 }}>{item.title}</div>
+                      <div style={{ fontSize: 13, color: '#4B5563', lineHeight: '20px' }}>{item.content}</div>
+                    </div>
+                  ))}
+                </div>
+                <button style={s.actionBtn} onClick={() => setBookModalVisible(false)}>關閉重溫</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const s = {
+      appWrapper: { maxWidth: 480, margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' },
+      fullScreen: { minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 20 },
+      authCard: { backgroundColor: '#FFF', borderRadius: 24, padding: 28, width: '100%', maxWidth: 400, textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+      authLogo: { fontSize: 26, fontWeight: 900, color: '#00A8CC', marginBottom: 4 },
+      authSubtitle: { fontSize: 14, color: '#6B7280', marginBottom: 24 },
+      inputGroup: { width: '100%', marginBottom: 16, textAlign: 'left' },
+      label: { fontSize: 13, fontWeight: 'bold', color: '#374151', marginBottom: 6 },
+      input: { width: '100%', backgroundColor: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: 12, padding: '12px 14px', fontSize: 15, color: '#1F2937' },
+      hintText: { fontSize: 11, color: '#6B7280', marginTop: 6 },
+      primaryBtn: { backgroundColor: '#00A8CC', borderRadius: 14, padding: '14px 0', width: '100%', color: '#FFF', fontWeight: 'bold', fontSize: 16, marginTop: 10 },
+      header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '14px 16px 4px' },
+      appTitle: { fontSize: 22, fontWeight: 900, color: '#00A8CC', letterSpacing: 0.5 },
+      subTextRow: { display: 'flex', alignItems: 'center', marginTop: 3 },
+      pillBadge: { display: 'flex', alignItems: 'center', backgroundColor: '#FFF', padding: '4px 8px', borderRadius: 16, border: '1px solid #E5E7EB' },
+      statText: { fontSize: 12, fontWeight: 'bold', color: '#1F2937' },
+      progressBarBg: { width: 32, height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, marginLeft: 4, overflow: 'hidden' },
+      settingsBtn: { backgroundColor: '#FFF', width: 28, height: 28, borderRadius: 14, display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid #E5E7EB', marginLeft: 2, fontSize: 14 },
+      cardContainer: { backgroundColor: '#FFF', margin: '10px 16px 0', borderRadius: 24, padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', border: '1px solid #E5E7EB' },
+      topPinkBar: { position: 'absolute', top: 15, left: 0, right: 0, height: 3, backgroundColor: '#FF4081' },
+      floatingButtons: { position: 'absolute', top: 12, right: 15, zIndex: 10, display: 'flex', flexDirection: 'column' },
+      circleBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#FFF', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px solid #FF4081', fontSize: 18 },
+      tag: { border: '1.5px solid #FF4081', borderRadius: 20, padding: '5px 16px', marginTop: 15, backgroundColor: '#FFF0F5', color: '#FF4081', fontWeight: 'bold', fontSize: 13 },
+      fetal3DContainer: { width: '100%', height: 230, margin: '15px 0', borderRadius: 16, overflow: 'hidden', backgroundColor: '#0d1117' },
+      dialogBox: { backgroundColor: '#F0F4F8', borderRadius: 16, padding: 16, width: '100%', marginBottom: 12 },
+      titleBadgeCard: { backgroundColor: '#FFF0F5', borderRadius: 16, padding: '10px 16px', width: '100%', textAlign: 'center', marginBottom: 12, border: '1.5px solid #FFD1DC', boxShadow: '0 2px 4px rgba(255,64,129,0.1)' },
+      growthBox: { backgroundColor: '#F9FAFB', borderRadius: 14, padding: '10px 16px', width: '100%', textAlign: 'center', marginBottom: 10 },
+      momBonusMainBtn: { backgroundColor: '#FFF0F5', border: '1.5px solid #FF4081', borderRadius: 14, padding: '12px 0', width: '100%', textAlign: 'center' },
+      momBonusMainBtnDone: { backgroundColor: '#F3F4F6', borderColor: '#D1D5DB' },
+      bottomNavCard: { position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, backgroundColor: '#FFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, padding: '12px 8px', display: 'flex', alignItems: 'center', borderTop: '1px solid #E5E7EB', boxShadow: '0 -2px 10px rgba(0,0,0,0.05)', zIndex: 50 },
+      navItem: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
+      navCircle: { width: 52, height: 52, borderRadius: 26, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 4, fontSize: 22 },
+      navLabel: { fontSize: 12, fontWeight: 'bold', color: '#374151', textAlign: 'center' },
+      modalOverlay: { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 20, zIndex: 100 },
+      weeklyCard: { backgroundColor: '#FFF', borderRadius: 24, padding: 20, width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', alignItems: 'center' },
+      weeklyTag: { backgroundColor: '#FFB800', borderRadius: 8, padding: '6px 14px', marginBottom: 10, color: '#FFF', fontWeight: 'bold', fontSize: 13 },
+      weeklyTitle: { fontSize: 20, fontWeight: 'bold', color: '#1F2937', textAlign: 'center', marginBottom: 8 },
+      modalSubDesc: { fontSize: 12, color: '#6B7280', textAlign: 'center', marginBottom: 14 },
+      momToastBanner: { backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 12, padding: 10, width: '100%', marginBottom: 12, color: '#047857', fontWeight: 'bold', fontSize: 13, textAlign: 'center' },
+      momRewardOptionBtn: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF0F5', border: '1px solid #FFD1DC', borderRadius: 14, padding: '12px 14px', marginBottom: 10 },
+      momRewardOptionBtnDisabled: { backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' },
+      momRewardPointsBadge: { borderRadius: 10, padding: '5px 10px', color: '#FFF', fontWeight: 'bold', fontSize: 12, whiteSpace: 'nowrap' },
+      bagCatHeader: { backgroundColor: '#E6F7FA', padding: '6px 10px', borderRadius: 6, marginBottom: 8, fontSize: 13, fontWeight: 'bold', color: '#007A99' },
+      bagItemBox: { backgroundColor: '#FFF', border: '1px solid #E2E8F0', borderRadius: 8, marginBottom: 8, overflow: 'hidden' },
+      bagCheck: { width: 20, height: 20, borderRadius: 4, border: '2px solid #0099B8', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#FFF', fontSize: 12, fontWeight: 'bold' },
+      disabledInputBox: { backgroundColor: '#F3F4F6', padding: 12, borderRadius: 12, border: '1px solid #E5E7EB', marginTop: 6 },
+      saveBtn: { backgroundColor: '#00A8CC', borderRadius: 14, padding: '12px 0', width: '100%', color: '#FFF', fontWeight: 'bold', fontSize: 15 },
+      cancelBtn: { padding: '10px 0', color: '#6B7280', fontSize: 13, fontWeight: 600, marginTop: 6 },
+      actionTaskBox: { backgroundColor: '#F9FAFB', borderRadius: 16, padding: 14, width: '100%', marginBottom: 12, border: '1px solid #E5E7EB' },
+      actionTaskHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+      actionTaskBtn: { width: '100%', borderRadius: 12, padding: '10px 0', color: '#FFF', fontSize: 14, fontWeight: 'bold', marginTop: 8 },
+      warningBox: { backgroundColor: '#FFF7ED', borderRadius: 14, padding: 14, width: '100%', marginBottom: 16, border: '1px solid #FFEDD5', textAlign: 'left' },
+      completeTaskBtn: { borderRadius: 16, padding: '15px 20px', width: '100%', color: '#FFF', fontSize: 14, fontWeight: 'bold', marginBottom: 8 },
+      backBtn: { backgroundColor: '#E5E7EB', padding: '6px 12px', borderRadius: 12, fontWeight: 'bold', color: '#374151', fontSize: 14 },
+      quizCard: { backgroundColor: '#FFF', borderRadius: 20, padding: 20, border: '1px solid #E5E7EB' },
+      knowledgeTitle: { fontSize: 18, fontWeight: 'bold', color: '#00A8CC', marginBottom: 15 },
+      knowledgeContent: { fontSize: 15, color: '#4B5563', lineHeight: '24px', marginBottom: 25 },
+      scoreBadge: { fontSize: 12, color: '#0284C7', fontWeight: 'bold', backgroundColor: '#E0F2FE', padding: '3px 10px', borderRadius: 10 },
+      optionBtn: { width: '100%', textAlign: 'left', borderRadius: 12, padding: 16, marginBottom: 12, border: '1.5px solid #E5E7EB', fontSize: 14, color: '#374151', fontWeight: 500 },
+      actionBtn: { backgroundColor: '#00A8CC', borderRadius: 14, padding: '14px 0', width: '100%', color: '#FFF', fontSize: 16, fontWeight: 'bold', marginTop: 15 },
+      celebrationBadge: { display: 'inline-block', backgroundColor: '#FFF0F5', border: '1.5px solid #FF4081', padding: '6px 16px', borderRadius: 20, color: '#FF4081', fontWeight: 'bold', fontSize: 14 },
+      praiseBubble: { backgroundColor: '#FFFBEB', borderRadius: 16, padding: 16, width: '100%', border: '1px solid #FDE68A', marginBottom: 16, fontSize: 15, fontWeight: 'bold', color: '#1F2937', lineHeight: '22px' },
+      historyItemBox: { backgroundColor: '#F9FAFB', padding: 14, borderRadius: 12, marginBottom: 10, border: '1px solid #E5E7EB' },
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
