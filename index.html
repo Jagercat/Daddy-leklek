@@ -308,13 +308,13 @@
 
       const cantonesePraises = {
         3: [
-          '「嘩！你真係好叻仔呀爸爸！全對過關，絕對係滿分神隊友！」',
-          '「犀利呀爸爸！題題都識答，媽媽同 BB 有你照顧真係好幸福！」',
-          '「勁呀！100% 全中！你已經準備好做個滿分好爸爸啦！」',
+          '「👶：嘩！爸爸你真係好叻呀！全對過關，絕對係媽媽嘅滿分神隊友！」',
+          '「👶：犀利呀爸爸！題題都識答，有你照顧我同媽媽真係好幸福！」',
+          '「👶：100% 全中！我相信你已經準備好做個滿分爸爸啦！」',
         ],
-        2: ['「你很棒呀爸爸！答啱超過一半啦，再加把勁挑戰全對拎三粒星解鎖下一關啦！」'],
-        1: ['「有心唔怕遲，你肯抽時間學已經好棒啦爸爸！」'],
-        0: ['「唔緊要呀爸爸，萬事起頭難！返去重溫一下小知識，挑戰全對解鎖下一關！」'],
+        2: ['「👶：你很棒呀爸爸！答啱超過一半啦，再加把勁挑戰全對拎三粒星解鎖下一關啦！」'],
+        1: ['「👶：有心唔怕遲，你肯抽時間學已經好棒啦爸爸！」'],
+        0: ['「👶：唔緊要呀爸爸，萬事起頭難！返去重溫一下小知識，挑戰全對解鎖下一關！」'],
       };
 
       const handleSubmitAnswer = () => {
@@ -383,7 +383,7 @@
           <div style={s.fullScreen}>
             <div style={s.authCard}>
               <div style={{ fontSize: 40, marginBottom: 10 }}>📅</div>
-              <div style={s.authLogo}>設定寶寶預產期</div>
+              <div style={s.authLogo}>設定媽媽預產期</div>
               <div style={{ ...s.authSubtitle, marginBottom: 20 }}>請輸入 8 位數字預產期（例如：20271015）</div>
               <div style={s.inputGroup}>
                 <div style={s.label}>預產期 (YYYY-MM-DD)</div>
@@ -464,7 +464,7 @@
                 ) : (
                   <div style={s.dialogBox}>
                     <div style={{ fontSize: 13, color: '#374151', textAlign: 'center', lineHeight: '20px' }}>
-                      今日係 W{currentWeek}D{currentDay}！完成今日全對 Quiz 即可解鎖寶寶對話與倒數計時！❤️ (距離見到爸爸仲有 {daysUntilDue} 日)
+                      今日係 W{currentWeek}D{currentDay}！爸爸，我依家已經好似{({16:'牛油果 🥑',17:'蘿蔔 🥕',18:'甜椒 🫑'}[currentWeek])}咁大啦！我仲有 {daysUntilDue} 日就可以見到你啦，爸爸❤️
                     </div>
                   </div>
                 )}
