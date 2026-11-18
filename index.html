@@ -508,6 +508,10 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#888', letterSpacing: 1 }}>你的稱號</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#D81B60', letterSpacing: 0.5 }}>{getDadTitle(level)}</div>
+<button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
+                <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
+                <div style={s.navLabel}>爸爸日記</div>
+              </button>
                 </div>
 
                 {/* 成長進度 */}
