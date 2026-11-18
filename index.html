@@ -510,6 +510,111 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#D81B60', letterSpacing: 0.5 }}>{getDadTitle(level)}</div>
 <button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
                 <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
+{/* 📖 爸爸日記雙分頁彈出視窗 */}
+          {diaryModalVisible && (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999, padding: 16 }}>
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: 20, width: '100%', maxWidth: 440, maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
+                {/* 頂部標題與關閉 */}
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: 17, fontWeight: 'bold', color: '#1F2937' }}>📖 爸爸的專屬日記</div>
+                  <button onClick={() => setDiaryModalVisible(false)} style={{ fontSize: 18, color: '#9CA3AF', padding: '4px 8px' }}>✕</button>
+                </div>
+
+                {/* 雙分頁切換掣 */}
+                <div style={{ display: 'flex', padding: '10px 16px', gap: 8, backgroundColor: '#F9FAFB' }}>
+                  <button
+                    onClick={() => setDiaryTab('kick')}
+                    style={{ flex: 1, padding: '10px 0', borderRadius: 12, fontWeight: 'bold', fontSize: 14, backgroundColor: diaryTab === 'kick' ? '#10B981' : '#E5E7EB', color: diaryTab === 'kick' ? '#FFFFFF' : '#4B5563' }}>
+                    👣 胎動日記 ({kickLogs.length})
+                  </button>
+                  <button
+                    onClick={() => setDiaryTab('weekly')}
+                    style={{ flex: 1, padding: '10px 0', borderRadius: 12, fontWeight: 'bold', fontSize: 14, backgroundColor: diaryTab === 'weekly' ? '#EC4899' : '#E5E7EB', color: diaryTab === 'weekly' ? '#FFFFFF' : '#4B5563' }}>
+                    ✍️ 每週日記 ({weeklyLogs.length})
+                  </button>
+                </div>
+
+                {/* 分頁內容區 */}
+                <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
+                  {diaryTab === 'kick' ? (
+                    <div>
+                      <div style={{ backgroundColor: '#ECFDF5', padding: 12, borderRadius: 14, marginBottom: 14 }}>
+                        <div style={{ fontSize: 13, fontWeight: 'bold', color: '#065F46', marginBottom: 8 }}>記錄今次摸到 BB 郁動（{`W${currentWeek}D${currentDay}`}）：</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                          {['輕輕踢一下 🦶', '翻身滾動 🌊', '打嗝跳動 💓', '聽見爸爸聲郁動 🗣️'].map(tag => (
+                            <button
+                              key={tag}
+                              onClick={() => setKickFeeling(tag)}
+                              style={{ padding: '6px 10px', borderRadius: 20, fontSize: 12, backgroundColor: kickFeeling === tag ? '#10B981' : '#FFFFFF', color: kickFeeling === tag ? '#FFFFFF' : '#374151', border: '1px solid #A7F3D0' }}>
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          value={kickNote}
+                          onChange={(e) => setKickNote(e.target.value)}
+                          placeholder="寫低當時情景（例：摸住媽媽個肚講故事）..."
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid #D1FAE5', fontSize: 13, backgroundColor: '#FFFFFF', marginBottom: 10 }}
+                        />
+                        <button
+                          onClick={handleAddKickLog}
+                          style={{ width: '100%', padding: '10px', borderRadius: 12, backgroundColor: '#10B981', color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>
+                          ＋ 記低今次胎動
+                        </button>
+                      </div>
+
+                      {kickLogs.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#9CA3AF', fontSize: 13, padding: '24px 0' }}>仲未有胎動紀錄，摸到 BB 郁動即刻記低佢啦！</div>
+                      ) : (
+                        kickLogs.map(item => (
+                          <div key={item.id} style={{ padding: 12, borderRadius: 12, border: '1px solid #E5E7EB', marginBottom: 10, backgroundColor: '#FFFFFF' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#6B7280', marginBottom: 4 }}>
+                              <span style={{ fontWeight: 'bold', color: '#059669' }}>{item.week} · {item.feeling}</span>
+                              <span>{item.time}</span>
+                            </div>
+                            <div style={{ fontSize: 13, color: '#1F2937' }}>{item.note}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ backgroundColor: '#FDF2F8', padding: 12, borderRadius: 14, marginBottom: 14 }}>
+                        <div style={{ fontSize: 13, fontWeight: 'bold', color: '#9D174D', marginBottom: 6 }}>第 {currentWeek} 週 · 準爸爸心底話</div>
+                        <div style={{ fontSize: 11, color: '#BE185D', marginBottom: 8 }}>寫低想對 BB 講嘅嘢、照顧媽媽嘅點滴，或者你嘅緊張與掙扎：</div>
+                        <textarea
+                          rows={4}
+                          value={weeklyNote}
+                          onChange={(e) => setWeeklyNote(e.target.value)}
+                          placeholder="親愛的 BB，今個禮拜爸爸..."
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid #FBCFE8', fontSize: 13, backgroundColor: '#FFFFFF', marginBottom: 10, resize: 'none', fontFamily: 'inherit' }}
+                        />
+                        <button
+                          onClick={handleAddWeeklyLog}
+                          style={{ width: '100%', padding: '10px', borderRadius: 12, backgroundColor: '#EC4899', color: '#FFFFFF', fontWeight: 'bold', fontSize: 14 }}>
+                          💌 儲存今週日記
+                        </button>
+                      </div>
+
+                      {weeklyLogs.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#9CA3AF', fontSize: 13, padding: '24px 0' }}>寫低第一篇畀 BB 嘅信，留住準爸爸最真實嘅心情吧！</div>
+                      ) : (
+                        weeklyLogs.map(item => (
+                          <div key={item.id} style={{ padding: 12, borderRadius: 12, border: '1px solid #FCE7F3', marginBottom: 10, backgroundColor: '#FFFDFD' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9D174D', fontWeight: 'bold', marginBottom: 6 }}>
+                              <span>{item.week}</span>
+                              <span style={{ color: '#9CA3AF', fontWeight: 'normal' }}>{item.date}</span>
+                            </div>
+                            <div style={{ fontSize: 13, color: '#1F2937', whiteSpace: 'pre-wrap', lineHeight: '20px' }}>{item.content}</div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
                 <div style={s.navLabel}>爸爸日記</div>
               </button>
                 </div>
