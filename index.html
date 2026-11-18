@@ -545,11 +545,11 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
             <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
             <div style={s.navLabel}>爸爸日記</div>
           </button>
-        </div>
-              </div>
-          </div>
-          {/* 📖 爸爸日記雙分頁彈出視窗 */}
-          {diaryModalVisible && (
+       </div>
+       </div>
+     </div>
+     {/* 📖 爸爸日記雙分頁彈出視窗 */}
+     {diaryModalVisible && (
             <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999, padding: 16 }}>
               <div style={{ backgroundColor: '#FFFFFF', borderRadius: 20, width: '100%', maxWidth: 440, maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
                 {/* 頂部標題與關閉 */}
