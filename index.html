@@ -508,8 +508,46 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#888', letterSpacing: 1 }}>你的稱號</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#D81B60', letterSpacing: 0.5 }}>{getDadTitle(level)}</div>
-                  
-{/* 📖 爸爸日記雙分頁彈出視窗 */}
+                </div>
+
+                {/* 成長進度 */}
+                <div style={s.growthBox}>
+                  <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>成長進度：Level {level} ({xp} / {maxExp} XP)</span>
+                </div>
+
+                {/* ❤️ 媽媽評分按鈕 */}
+                <button
+                  style={{ ...s.momBonusMainBtn, ...(isMomRatedToday ? s.momBonusMainBtnDone : {}) }}
+                  onClick={() => setMomBonusModalVisible(true)}
+                >
+                  <span style={{ color: isMomRatedToday ? '#6B7280' : '#D81B60', fontSize: 14, fontWeight: 'bold' }}>
+                    {isMomRatedToday ? '✅ 今日媽媽已完成評分（每日限一次）' : '❤️ 媽媽評分發放獎勵 (XP)'}
+                  </span>
+                </button>
+              </div>
+
+              {/* 底部導覽列 */}
+              <div style={s.bottomNavCard}>
+                <button style={s.navItem} onClick={() => { setQuizStep(0); setCorrectCount(0); setSelectedOption(null); setIsSubmitted(false); setCurrentScreen('quiz'); }}>
+                  <div style={{ ...s.navCircle, backgroundColor: '#00E5FF' }}>💡</div>
+                  <div style={s.navLabel}>每日知識 Quiz</div>
+                </button>
+                <button style={s.navItem} onClick={() => setActionModalVisible(true)}>
+                  <div style={{ ...s.navCircle, backgroundColor: '#FF4081' }}>🤝</div>
+                  <div style={s.navLabel}>實體互動任務</div>
+                </button>
+                <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
+                  <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
+                  <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
+                </button>
+                
+          <button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
+            <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
+            <div style={s.navLabel}>爸爸日記</div>
+          </button>
+        </div>
+              </div>
+          {/* 📖 爸爸日記雙分頁彈出視窗 */}
           {diaryModalVisible && (
             <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999, padding: 16 }}>
               <div style={{ backgroundColor: '#FFFFFF', borderRadius: 20, width: '100%', maxWidth: 440, maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
@@ -614,49 +652,6 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
               </div>
             </div>
           )}
-                </div>
-
-                {/* 成長進度 */}
-                <div style={s.growthBox}>
-                  <span style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>成長進度：Level {level} ({xp} / {maxExp} XP)</span>
-                </div>
-
-                {/* ❤️ 媽媽評分按鈕 */}
-                <button
-                  style={{ ...s.momBonusMainBtn, ...(isMomRatedToday ? s.momBonusMainBtnDone : {}) }}
-                  onClick={() => setMomBonusModalVisible(true)}
-                >
-                  <span style={{ color: isMomRatedToday ? '#6B7280' : '#D81B60', fontSize: 14, fontWeight: 'bold' }}>
-                    {isMomRatedToday ? '✅ 今日媽媽已完成評分（每日限一次）' : '❤️ 媽媽評分發放獎勵 (XP)'}
-                  </span>
-                </button>
-              </div>
-
-              {/* 底部導覽列 */}
-              <div style={s.bottomNavCard}>
-                <button style={s.navItem} onClick={() => { setQuizStep(0); setCorrectCount(0); setSelectedOption(null); setIsSubmitted(false); setCurrentScreen('quiz'); }}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#00E5FF' }}>💡</div>
-                  <div style={s.navLabel}>每日知識 Quiz</div>
-                </button>
-                <button style={s.navItem} onClick={() => setActionModalVisible(true)}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#FF4081' }}>🤝</div>
-                  <div style={s.navLabel}>實體互動任務</div>
-                </button>
-                <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
-                  <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
-                </button>
-                <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
-            <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
-            <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
-          </button>
-          {/* 👇 貼喺呢度（同上面 3 粒掣並排） */}
-          <button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
-            <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
-            <div style={s.navLabel}>爸爸日記</div>
-          </button>
-        </div>
-              </div>
             </div>
           ) : (
             /* ================= Quiz 頁面 ================= */
