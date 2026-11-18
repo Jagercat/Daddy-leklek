@@ -136,6 +136,38 @@
       const [momBonusModalVisible, setMomBonusModalVisible] = useState(false);
       const [actionModalVisible, setActionModalVisible] = useState(false);
       const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+const [diaryModalVisible, setDiaryModalVisible] = useState(false);
+  const [diaryTab, setDiaryTab] = useState('kick'); // 'kick' 胎動日記 | 'weekly' 每週日記
+  const [kickFeeling, setKickFeeling] = useState('輕輕踢一下 🦶');
+  const [kickNote, setKickNote] = useState('');
+  const [kickLogs, setKickLogs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('daddy_kick_logs') || '[]'); } catch { return []; }
+  });
+  const [weeklyNote, setWeeklyNote] = useState('');
+  const [weeklyLogs, setWeeklyLogs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('daddy_weekly_logs') || '[]'); } catch { return []; }
+  });
+
+  const handleAddKickLog = () => {
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const newItem = { id: Date.now(), week: `W${currentWeek}D${currentDay}`, time: timeStr, feeling: kickFeeling, note: kickNote.trim() || '爸爸感受到你郁動啦！' };
+    const updated = [newItem, ...kickLogs];
+    setKickLogs(updated);
+    localStorage.setItem('daddy_kick_logs', JSON.stringify(updated));
+    setKickNote('');
+  };
+
+  const handleAddWeeklyLog = () => {
+    if (!weeklyNote.trim()) return;
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const newItem = { id: Date.now(), week: `第 ${currentWeek} 週 (W${currentWeek}D${currentDay})`, date: dateStr, content: weeklyNote.trim() };
+    const updated = [newItem, ...weeklyLogs];
+    setWeeklyLogs(updated);
+    localStorage.setItem('daddy_weekly_logs', JSON.stringify(updated));
+    setWeeklyNote('');
+  };
 
       const [isMomRatedToday, setIsMomRatedToday] = useState(false);
       const [momToastMessage, setMomToastMessage] = useState('');
