@@ -126,7 +126,7 @@
 
       const getDemoDueDate = () => {
   const d = new Date();
-  d.setDate(d.getDate() + 168); // 距離預產期 24 週（168 日）= 永遠顯示 W16D0
+  d.setDate(d.getDate() + 175); // 距離預產期 25 週（175 日）= 永遠顯示 W16D0
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 const [dueDate, setDueDate] = useState(getDemoDueDate);
