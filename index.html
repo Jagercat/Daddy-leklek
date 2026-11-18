@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
-<script>
-  const origErr = console.error;
-  console.error = function(...args) {
-    alert("編譯錯誤:\n" + args.join("\n"));
-    origErr.apply(console, args);
-  };
-</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>神隊友育成器 - 新手爸爸升級指南</title>
@@ -553,7 +546,6 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
           </button>
        </div>
        </div>
-            </div>
           ) : (
             /* ================= Quiz 頁面 ================= */
             <div style={{ padding: 20, maxWidth: 480, margin: '0 auto', width: '100%' }}>
