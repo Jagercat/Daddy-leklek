@@ -772,7 +772,7 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                   <div style={s.navLabel}>每日知識 Quiz</div>
                 </button>
                 <button style={s.navItem} onClick={() => setActionModalVisible(true)}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#FF4081' }}>🤝</div>
+                  <div style={{ ...s.navCircle, backgroundColor: '#FF4081' }}>🤝🏼</div>
                   <div style={s.navLabel}>實體互動任務</div>
                 </button>
                 <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
@@ -1213,7 +1213,7 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
           {actionModalVisible && (
             <div style={s.modalOverlay} onClick={() => setActionModalVisible(false)}>
               <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
-                <div style={{ ...s.weeklyTag, backgroundColor: '#FF4081' }}>每日神隊友行動 🤝</div>
+                <div style={{ ...s.weeklyTag, backgroundColor: '#FF4081' }}>每日神隊友行動 🤝🏼</div>
                 <div style={s.weeklyTitle}>今日實體互動任務</div>
                 <div style={s.actionTaskBox}>
                   <div style={s.actionTaskHeader}>
