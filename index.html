@@ -410,10 +410,10 @@
               <div style={s.header}>
                 <div style={{ flex: 1, marginRight: 6 }}>
                   <div style={s.appTitle}>神隊友育成器</div>
-                  <div style={s.subTextRow}>
-                    <span style={{ fontSize: 12, fontWeight: 'bold', color: '#374151' }}>W{currentWeek}D{currentDay}</span>
+                  <div style={{ ...s.subTextRow, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ fontSize: 'clamp(10px, 2.8vw, 12px)', fontWeight: 'bold', color: '#374151' }}>W{currentWeek}D{currentDay}</span>
                     <span style={{ fontSize: 11, color: '#9CA3AF', margin: '0 4px' }}>｜</span>
-                    <span style={{ fontSize: 12, color: '#6B7280' }}>預產期: {dueDate}</span>
+                    <span style={{ fontSize: 'clamp(10px, 2.8vw, 12px)', color: '#6B7280' }}>預產期: {dueDate}</span>
                   </div>
                 </div>
 
