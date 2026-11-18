@@ -124,8 +124,13 @@
       const [password, setPassword] = useState('123456');
       const [isSignUp, setIsSignUp] = useState(false);
 
-      const [dueDate, setDueDate] = useState('2027-05-01');
-      const [tempDueDate, setTempDueDate] = useState('2027-05-01');
+      const getDemoDueDate = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 168); // 距離預產期 24 週（168 日）= 永遠顯示 W16D0
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const [dueDate, setDueDate] = useState(getDemoDueDate);
+const [tempDueDate, setTempDueDate] = useState(getDemoDueDate);
       const [isDueDateModified, setIsDueDateModified] = useState(false);
 
       const [currentScreen, setCurrentScreen] = useState('home');
