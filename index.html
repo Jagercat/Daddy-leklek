@@ -294,7 +294,7 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
 
       const allKnowledgeList = [
         { day: 1, title: '👶 小知識：胃口回歸與熱量控制', content: '媽媽孕吐減緩、食慾大開，但不需要「一人吃兩人補」。每天只需比平時多攝取約 300 大卡(約一碗飯加一顆蛋），爸爸可多準備蛋白質與蔬菜，避免體重增加太快。' },
-        { day: 2, title: '👶 小知識：寶寶像牛油果大小，開始會做表情', content: '6 週的寶寶約 11–12 公分，臉部小肌肉開始發育，會皺眉、做鬼臉甚至吸大拇指！同時骨骼正在變硬，爸爸記得提醒媽媽多補充鈣質。' },
+        { day: 2, title: '👶 小知識：寶寶像牛油果大小，開始會做表情', content: '16 週的寶寶約 11–12 公分，臉部小肌肉開始發育，會皺眉、做鬼臉甚至吸大拇指！同時骨骼正在變硬，爸爸記得提醒媽媽多補充鈣質。' },
         { day: 3, title: '👶 小知識：胎盤形成與顯懷', content: '胎盤已經完全發育並接管了供給寶寶營養和氧氣的重要任務；同時子宮開始往上離開骨盆腔，媽媽的肚子（「顯懷」）會開始微微隆起。爸爸這時可以幫忙挑選舒適、不壓迫肚子的孕婦裝或褲子，讓媽媽穿得更舒服！' },
         { day: 4, title: '👶 小知識：情緒支持與神隊友', content: '荷爾蒙改變會讓媽媽情緒起伏較大，爸爸的主動傾聽與包容就是最好的處方！' },
         { day: 5, title: '👶 小知識：避免接觸有害物質', content: '遠離二手煙、酒精及未煮熟的食物，確保媽媽與寶寶的環境安全。' },
@@ -508,8 +508,7 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#888', letterSpacing: 1 }}>你的稱號</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#D81B60', letterSpacing: 0.5 }}>{getDadTitle(level)}</div>
-<button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
-                <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
+                  
 {/* 📖 爸爸日記雙分頁彈出視窗 */}
           {diaryModalVisible && (
             <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999, padding: 16 }}>
@@ -615,8 +614,6 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
               </div>
             </div>
           )}
-                <div style={s.navLabel}>爸爸日記</div>
-              </button>
                 </div>
 
                 {/* 成長進度 */}
@@ -649,6 +646,16 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                   <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
                   <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
                 </button>
+                <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
+            <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
+            <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
+          </button>
+          {/* 👇 貼喺呢度（同上面 3 粒掣並排） */}
+          <button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
+            <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
+            <div style={s.navLabel}>爸爸日記</div>
+          </button>
+        </div>
               </div>
             </div>
           ) : (
