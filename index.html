@@ -143,6 +143,16 @@ const [tempDueDate, setTempDueDate] = useState(getDemoDueDate);
 const [diaryModalVisible, setDiaryModalVisible] = useState(false);
       /* 🧠 EQ訓練所狀態與題庫 */
   const [eqModalVisible, setEqModalVisible] = useState(false);
+  const [privilegeModalVisible, setPrivilegeModalVisible] = useState(false);
+const [privilegeNotice, setPrivilegeNotice] = useState('');
+const [redeemedVouchers, setRedeemedVouchers] = useState(() => {
+  try {
+    const saved = localStorage.getItem('daddy_redeemed_vouchers');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+});
   const [eqStage, setEqStage] = useState('pregnancy'); // 'pregnancy' | 'delivery' | 'postpartum'
   const [eqStones, setEqStones] = useState(() => {
     try { return parseInt(localStorage.getItem('daddy_eq_stones') || '0', 10); } catch { return 0; }
