@@ -1252,6 +1252,68 @@ const handleToggleVoucherStatus = (voucherId) => {
           </div>
         );
       })()}
+          {privilegeModalVisible && (
+  <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 16, zIndex: 999 }}>
+    <div style={{ backgroundColor: '#FFFFFF', borderRadius: 22, width: '100%', maxWidth: 450, maxHeight: '88vh', overflowY: 'auto', padding: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ fontSize: 18, fontWeight: 'bold', color: '#0F172A' }}>情商石特權兌換區</div>
+        <button onClick={() => { setPrivilegeNotice(''); setPrivilegeModalVisible(false); }} style={{ fontSize: 18, color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+      </div>
+
+      <div style={{ fontSize: 14, fontWeight: 'bold', color: '#0284C7', marginBottom: 10 }}>
+        現有情商石：{eqStones}
+      </div>
+
+      {privilegeNotice ? (
+        <div style={{ backgroundColor: '#EFF6FF', color: '#1E3A8A', padding: 10, borderRadius: 10, fontSize: 12, marginBottom: 12 }}>
+          {privilegeNotice}
+        </div>
+      ) : null}
+
+      {EQ_PRIVILEGES.map((item) => {
+        const canAfford = eqStones >= item.cost;
+        return (
+          <div key={item.id} style={{ border: '1px solid #CBD5E1', borderRadius: 14, padding: 12, marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 'bold', color: '#0F172A' }}>
+              【{item.title}】（需 {item.cost} 情商石）
+            </div>
+            <div style={{ fontSize: 11, color: '#0F766E', fontWeight: 'bold', marginTop: 4 }}>
+              {item.badge}
+            </div>
+            <div style={{ fontSize: 12, color: '#334155', marginTop: 6, lineHeight: 1.5 }}>
+              「{item.content}」
+            </div>
+            <button
+              disabled={!canAfford}
+              onClick={() => handleRedeemPrivilege(item)}
+              style={{ width: '100%', marginTop: 8, padding: 8, borderRadius: 10, border: 'none', fontWeight: 'bold', cursor: canAfford ? 'pointer' : 'not-allowed', backgroundColor: canAfford ? '#0284C7' : '#E2E8F0', color: canAfford ? '#FFFFFF' : '#94A3B8' }}
+            >
+              {canAfford ? '立即兌換' : '情商石不足'}
+            </button>
+          </div>
+        );
+      })}
+
+      <div style={{ fontSize: 14, fontWeight: 'bold', color: '#0F172A', marginTop: 14, marginBottom: 8 }}>
+        已兌換憑證（{redeemedVouchers.length}）
+      </div>
+
+      {redeemedVouchers.map((v) => (
+        <div key={v.voucherId} style={{ border: '1px dashed #0284C7', borderRadius: 12, padding: 10, marginBottom: 8, opacity: v.usedByWife ? 0.65 : 1 }}>
+          <div style={{ fontSize: 11, color: '#64748B' }}>#{v.voucherCode}・{v.redeemedAt}</div>
+          <div style={{ fontSize: 13, fontWeight: 'bold', color: '#0F172A', marginTop: 2 }}>【{v.title}】・{v.badge}</div>
+          <div style={{ fontSize: 12, color: '#1E293B', marginTop: 4 }}>「{v.content}」</div>
+          <button
+            onClick={() => handleToggleVoucherStatus(v.voucherId)}
+            style={{ marginTop: 6, padding: '4px 8px', borderRadius: 8, border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF', fontSize: 11, cursor: 'pointer' }}
+          >
+            {v.usedByWife ? '標記為未核銷' : '標記為已向老婆出示／已核銷'}
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
           {settingsModalVisible && (
             <div style={s.modalOverlay} onClick={() => setSettingsModalVisible(false)}>
               <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
