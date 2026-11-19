@@ -143,6 +143,7 @@ const [tempDueDate, setTempDueDate] = useState(getDemoDueDate);
 const [diaryModalVisible, setDiaryModalVisible] = useState(false);
       /* 🧠 EQ訓練所狀態與題庫 */
   const [eqModalVisible, setEqModalVisible] = useState(false);
+      const [eqDisclaimerAck, setEqDisclaimerAck] = useState(false);
   const [privilegeModalVisible, setPrivilegeModalVisible] = useState(false);
 const [privilegeNotice, setPrivilegeNotice] = useState('');
 const [redeemedVouchers, setRedeemedVouchers] = useState(() => {
@@ -1135,7 +1136,31 @@ const handleToggleVoucherStatus = (voucherId) => {
         return (
           <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: 16 }} onClick={() => setEqModalVisible(false)}>
             <div style={{ backgroundColor: '#FFFFFF', borderRadius: 22, width: '100%', maxWidth: 450, maxHeight: '88vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }} onClick={(e) => e.stopPropagation()}>
-              
+              {!eqDisclaimerAck ? (
+  <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ fontSize: 18, fontWeight: 'bold', color: '#0F172A' }}>
+      作答前小提醒
+    </div>
+    <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 14, padding: 14, fontSize: 13, color: '#78350F', lineHeight: 1.7 }}>
+      每個家庭嘅相處模式同文化背景都唔同，未必人人做法一樣。以下題目嘅建議選項只供參考，本意係希望喺虛弱階段好好保護媽媽，同時幫爸爸應對親戚難題時，既照顧到媽媽感受，又唔會落長輩／親戚面子。
+    </div>
+    <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+      <button
+        onClick={() => setEqModalVisible(false)}
+        style={{ flex: 1, padding: '11px 12px', borderRadius: 12, border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF', color: '#475569', fontSize: 13, fontWeight: 'bold', cursor: 'pointer' }}
+      >
+        返回
+      </button>
+      <button
+        onClick={() => setEqDisclaimerAck(true)}
+        style={{ flex: 2, padding: '11px 12px', borderRadius: 12, border: 'none', backgroundColor: '#7C3AED', color: '#FFFFFF', fontSize: 13, fontWeight: 'bold', cursor: 'pointer' }}
+      >
+        明白，開始挑戰
+      </button>
+    </div>
+  </div>
+) : (
+  <>
               {/* 頂部標題列 */}
               <div style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F5F3FF' }}>
                 <div>
@@ -1251,7 +1276,8 @@ const handleToggleVoucherStatus = (voucherId) => {
                   </button>
                 </div>
               </div>
-
+              </>
+)}
             </div>
           </div>
         );
