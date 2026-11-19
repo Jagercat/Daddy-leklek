@@ -768,20 +768,20 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
               {/* 底部導覽列 */}
               <div style={s.bottomNavCard}>
                 <button style={s.navItem} onClick={() => { setQuizStep(0); setCorrectCount(0); setSelectedOption(null); setIsSubmitted(false); setCurrentScreen('quiz'); }}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#00E5FF' }}>💡</div>
+                  <div style={{ ...s.navCircle, backgroundColor: '#507282' }}>💡</div>
                   <div style={s.navLabel}>每日知識 Quiz</div>
                 </button>
                 <button style={s.navItem} onClick={() => setActionModalVisible(true)}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#FF4081' }}>🤝🏼</div>
+                  <div style={{ ...s.navCircle, backgroundColor: '#C08F80' }}>🤝🏼</div>
                   <div style={s.navLabel}>實體互動任務</div>
                 </button>
                 <button style={s.navItem} onClick={() => setWeeklyModalVisible(true)}>
-                  <div style={{ ...s.navCircle, backgroundColor: '#FFB300' }}>🏆</div>
+                  <div style={{ ...s.navCircle, backgroundColor: '#FEC77C' }}>🏆</div>
                   <div style={s.navLabel}>{isWeeklyTaskCompleted ? '每週任務 (已完成)' : '每週大任務'}</div>
                 </button>
                 
           <button style={s.navItem} onClick={() => setDiaryModalVisible(true)}>
-            <div style={{ ...s.navCircle, backgroundColor: '#10B981' }}>📖</div>
+            <div style={{ ...s.navCircle, backgroundColor: '#7E8959' }}>📖</div>
             <div style={s.navLabel}>爸爸日記</div>
           </button>
        </div>
@@ -1299,7 +1299,7 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
       circleBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#FFF', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px solid #FF4081', fontSize: 18 },
       tag: { border: '1.5px solid #FF4081', borderRadius: 20, padding: '5px 16px', marginTop: 15, backgroundColor: '#FFF0F5', color: '#FF4081', fontWeight: 'bold', fontSize: 13 },
       fetal3DContainer: { width: '100%', height: 230, margin: '15px 0', borderRadius: 16, overflow: 'hidden', backgroundColor: '#0d1117' },
-      dialogBox: { backgroundColor: '#F0F4F8', borderRadius: 16, padding: 16, width: '100%', marginBottom: 12 },
+      dialogBox: { backgroundColor: '#F3E5D1', borderRadius: 16, padding: 16, width: '100%', marginBottom: 12 },
       titleBadgeCard: { backgroundColor: '#FFF0F5', borderRadius: 16, padding: '10px 16px', width: '100%', textAlign: 'center', marginBottom: 12, border: '1.5px solid #FFD1DC', boxShadow: '0 2px 4px rgba(255,64,129,0.1)' },
       growthBox: { backgroundColor: '#F9FAFB', borderRadius: 14, padding: '10px 16px', width: '100%', textAlign: 'center', marginBottom: 10 },
       momBonusMainBtn: { backgroundColor: '#FFF0F5', border: '1.5px solid #FF4081', borderRadius: 14, padding: '12px 0', width: '100%', textAlign: 'center' },
