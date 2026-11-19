@@ -143,6 +143,20 @@ const [tempDueDate, setTempDueDate] = useState(getDemoDueDate);
 const [diaryModalVisible, setDiaryModalVisible] = useState(false);
       /* 🧠 EQ訓練所狀態與題庫 */
   const [eqModalVisible, setEqModalVisible] = useState(false);
+      const [privilegeModalVisible, setPrivilegeModalVisible] = useState(false);
+const [privilegeNotice, setPrivilegeNotice] = useState('');
+const [redeemedVouchers, setRedeemedVouchers] = useState(() => {
+  try {
+    const saved = localStorage.getItem('daddy_redeemed_vouchers');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+});
+
+useEffect(() => {
+  localStorage.setItem('daddy_redeemed_vouchers', JSON.stringify(redeemedVouchers));
+}, [redeemedVouchers]);
   const [eqStage, setEqStage] = useState('pregnancy'); // 'pregnancy' | 'delivery' | 'postpartum'
   const [eqStones, setEqStones] = useState(() => {
     try { return parseInt(localStorage.getItem('daddy_eq_stones') || '0', 10); } catch { return 0; }
@@ -302,7 +316,76 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
       }
     ]
   };
+const EQ_PRIVILEGES = [
+  {
+    id: 'priv_metime',
+    title: '神隊友放風（Me-Time）申請表',
+    cost: 2,
+    badge: '神隊友認證印章',
+    content:
+      '茲證明 [爸爸名字] 已通過 App 內 EQ 測試及完成本週育兒任務，現申請放假 2 小時（打機／做運動／同兄弟食飯）。期間手機保持響鈴，隨傳隨到。'
+  },
+  {
+    id: 'priv_immunity',
+    title: '免死金牌：講錯嘢豁免券',
+    cost: 3,
+    badge: '初犯警告豁免',
+    content:
+      '如本準爸爸因一時腦霧、語無倫次而講錯嘢惹怒準媽媽，出示此券可獲「初犯警告」一次，免除跪玻璃或瞓梳化之刑罰（嚴重原則性錯誤除外）。'
+  },
+  {
+    id: 'priv_sleepin',
+    title: '週末瞓晏覺特權卡',
+    cost: 2,
+    badge: '滿電續航認證',
+    content:
+      '憑券可於指定週末朝早延遲起床至 11:00 AM。醒來後保證精力充沛，全天候投入照顧準媽媽。'
+  }
+];
 
+const handleRedeemPrivilege = (item) => {
+  if (eqStones < item.cost) {
+    setPrivilegeNotice(`情商石不足！仲差 ${item.cost - eqStones} 粒 💎，快啲去 EQ 訓練所答啱題目賺返先。`);
+    return;
+  }
+
+  const fatherDisplayName = (typeof userName !== 'undefined' && userName?.trim())
+    ? userName.trim()
+    : '準爸爸';
+
+  const personalizedContent = item.content.replace(/\[爸爸名字\]/g, fatherDisplayName);
+  const now = new Date();
+  const voucherCode = `EQ-${now.getFullYear().toString().slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const newVoucher = {
+    voucherId: `${item.id}_${Date.now()}`,
+    voucherCode,
+    title: item.title,
+    badge: item.badge,
+    content: personalizedContent,
+    cost: item.cost,
+    redeemedAt: now.toLocaleString('zh-HK', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    usedByWife: false
+  };
+
+  setEqStones((prev) => prev - item.cost);
+  setRedeemedVouchers((prev) => [newVoucher, ...prev]);
+  setPrivilegeNotice(`已成功兌換「${item.title}」（-${item.cost} 💎），可出示憑證俾老婆過目！`);
+};
+
+const handleToggleVoucherStatus = (voucherId) => {
+  setRedeemedVouchers((prev) =>
+    prev.map((v) =>
+      v.voucherId === voucherId ? { ...v, usedByWife: !v.usedByWife } : v
+    )
+  );
+};
   const todayStr = new Date().toISOString().split('T')[0];
 
   const getActiveEqQuestion = (stage) => {
@@ -688,7 +771,7 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
                 </div>
 
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                 <div style={{ ...s.pillBadge, cursor: 'pointer' }} onClick={() => setEqModalVisible(true)}>
+                 <div style={{ ...s.pillBadge, cursor: 'pointer' }} onClick={() => { setPrivilegeNotice(''); setPrivilegeModalVisible(true); }}>
             <span style={{ fontSize: 12, marginRight: 2 }}>💎</span>
             <span style={s.statText}>{eqStones}</span>
           </div>
@@ -1187,6 +1270,120 @@ const [diaryModalVisible, setDiaryModalVisible] = useState(false);
           </div>
         );
       })()}
+          {privilegeModalVisible && (
+  <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 16, zIndex: 999 }}>
+    <div style={{ backgroundColor: '#FFFFFF', borderRadius: 22, width: '100%', maxWidth: 450, maxHeight: '88vh', overflowY: 'auto', padding: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 'bold', color: '#0F172A' }}>💎 情商石特權兌換區</div>
+          <div style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>扣減情商石換取神隊友特權憑證，隨時向老婆出示</div>
+        </div>
+        <button
+          onClick={() => setPrivilegeModalVisible(false)}
+          style={{ fontSize: 18, color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 12, padding: '10px 14px', marginBottom: 12 }}>
+        <span style={{ fontSize: 13, fontWeight: 'bold', color: '#334155' }}>現有情商石</span>
+        <span style={{ fontSize: 16, fontWeight: 'bold', color: '#0284C7' }}>💎 {eqStones}</span>
+      </div>
+
+      {privilegeNotice && (
+        <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E3A8A', borderRadius: 10, padding: '8px 12px', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
+          {privilegeNotice}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+        {EQ_PRIVILEGES.map((item) => {
+          const canAfford = eqStones >= item.cost;
+          return (
+            <div key={item.id} style={{ border: '1px solid #CBD5E1', borderRadius: 14, padding: 12, backgroundColor: '#FFFFFF' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 14, fontWeight: 'bold', color: '#0F172A' }}>【{item.title}】</div>
+                <span style={{ fontSize: 12, fontWeight: 'bold', color: '#0284C7', backgroundColor: '#E0F2FE', padding: '3px 8px', borderRadius: 999 }}>
+                  💎 {item.cost}
+                </span>
+              </div>
+              <div style={{ display: 'inline-block', marginTop: 6, fontSize: 11, fontWeight: 'bold', color: '#0F766E', backgroundColor: '#CCFBF1', padding: '2px 8px', borderRadius: 999 }}>
+                🏅 {item.badge}
+              </div>
+              <div style={{ fontSize: 12, color: '#334155', backgroundColor: '#F8FAFC', padding: 10, borderRadius: 10, marginTop: 8, lineHeight: 1.6 }}>
+                「{item.content}」
+              </div>
+              <button
+                disabled={!canAfford}
+                onClick={() => handleRedeemPrivilege(item)}
+                style={{
+                  width: '100%',
+                  marginTop: 10,
+                  padding: '9px 12px',
+                  borderRadius: 10,
+                  border: 'none',
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  cursor: canAfford ? 'pointer' : 'not-allowed',
+                  backgroundColor: canAfford ? '#0284C7' : '#E2E8F0',
+                  color: canAfford ? '#FFFFFF' : '#94A3B8'
+                }}
+              >
+                {canAfford ? `立即兌換（-${item.cost} 💎）` : `情商石不足（需 ${item.cost} 💎）`}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ fontSize: 14, fontWeight: 'bold', color: '#0F172A', marginBottom: 8 }}>
+        已兌換憑證（{redeemedVouchers.length}）
+      </div>
+
+      {redeemedVouchers.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 14, borderRadius: 12, backgroundColor: '#F8FAFC', color: '#64748B', fontSize: 12 }}>
+          暫時未有已兌換憑證
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {redeemedVouchers.map((v) => (
+            <div
+              key={v.voucherId}
+              style={{
+                border: '1px dashed #0284C7',
+                borderRadius: 12,
+                padding: 12,
+                backgroundColor: v.usedByWife ? '#F8FAFC' : '#F0F9FF',
+                opacity: v.usedByWife ? 0.72 : 1
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748B', marginBottom: 4 }}>
+                <span>#{v.voucherCode}</span>
+                <span>{v.redeemedAt}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                <strong style={{ fontSize: 13, color: '#0F172A' }}>【{v.title}】</strong>
+                <span style={{ fontSize: 10, fontWeight: 'bold', padding: '2px 7px', borderRadius: 999, backgroundColor: '#FEF3C7', color: '#B45309' }}>
+                  ✓ {v.badge}
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: '#1E293B', marginTop: 6, lineHeight: 1.55 }}>
+                「{v.content}」
+              </div>
+              <button
+                onClick={() => handleToggleVoucherStatus(v.voucherId)}
+                style={{ marginTop: 8, padding: '5px 9px', borderRadius: 8, border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF', color: '#334155', fontSize: 11, fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                {v.usedByWife ? '標記為未核銷' : '標記為已向老婆出示／已核銷'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
           {settingsModalVisible && (
             <div style={s.modalOverlay} onClick={() => setSettingsModalVisible(false)}>
               <div style={s.weeklyCard} onClick={(e) => e.stopPropagation()}>
